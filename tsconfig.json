@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",                                  
+    "target": "ES2022", 
+    "module": "commonjs", 
+    "outDir": "./build",  
+    "sourceMap": true, 
+    "removeComments": true, 
+    "strict": true,
+    "esModuleInterop": true, 
+    "moduleResolution": "node", 
+    // "typeRoots": ["src/types", "node_modules/@types"],  
+    "emitDecoratorMetadata": true,  
+    "experimentalDecorators": true,  
+    "strictPropertyInitialization": false,    
+    "paths": {
+      "enums/*":["src/enums"]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+    mysql:
+        container_name: mysql.id
+        hostname: mysql.id
+        image: mysql:5.7.33
+        restart: on-failure
+        ports:
+            - '3307:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: testowa-db
+            MYSQL_USER: iduser
+            MYSQL_PASSWORD: iduser
+        command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--default-authentication-plugin=mysql_native_password']
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: rabbitmq
+        ports:
+            - '5672:5672'
+            - '15672:15672'
+        volumes:
+            - ./rabbitmq_data:/var/lib/rabbitmq
+        restart: unless-stopped
