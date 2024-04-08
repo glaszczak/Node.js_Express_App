@@ -1,5 +1,6 @@
 import 'infrastructure/storages/database';
 
+import { ENV } from 'config/env';
 import { LoggerLevel } from 'enums';
 import express from 'express';
 import helmet from 'helmet';
@@ -17,8 +18,10 @@ app.use(express.json());
 app.use(helmet());
 
 async function initializeDependencies() {
-    Container.set('RABBITMQ_URI', process.env.RABBITMQ_URI);
-    Container.set('RABBITMQ_QUEUE', process.env.RABBITMQ_QUEUE);
+    Container.set('RABBITMQ_URI', ENV.RABBITMQ.URI);
+
+    Container.set('RABBITMQ_QUEUE_1', ENV.RABBITMQ.QUEUES[0]?.NAME);
+    Container.set('RABBITMQ_QUEUE_2', ENV.RABBITMQ.QUEUES[1]?.NAME);
 
     try {
         const rabbitMQInitializer = Container.get(RabbitMQInitializer);

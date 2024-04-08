@@ -1,3 +1,4 @@
+import { ENV } from 'config/env';
 import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
@@ -7,7 +8,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
 
     if (token == null) return res.sendStatus(401);
 
-    verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
+    verify(token, ENV.JWT.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);
 
         (req as any).user = user;

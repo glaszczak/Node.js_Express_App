@@ -1,4 +1,4 @@
-import { rabbitMQConfig } from 'config/rabbitmqConfig';
+import { ENV } from 'config/env';
 import { LoggerLevel } from 'enums';
 import { Inject, Service } from 'typedi';
 import { logger, loggerMessage } from 'utils/logger';
@@ -63,31 +63,29 @@ export class RabbitMQInitializer {
     }
 
     async setupTopicExchangeAndQueues() {
-        const { exchange, queues } = rabbitMQConfig;
+        const exchange = ENV.RABBITMQ.EXCHANGE;
+        const queues = ENV.RABBITMQ.QUEUES;
+
         const channel = await this.rabbitMQService.getChannel();
 
         await channel.assertExchange(exchange, 'topic', { durable: true });
 
-        for (const { queueName, routingKeys } of queues) {
-            if (routingKeys && Array.isArray(routingKeys)) {
-                for (const routingKey of routingKeys) {
-                    if (typeof routingKey === 'string') {
-                        await channel.assertQueue(queueName, { durable: true });
+        for (const { NAME: queueName, ROUTING_KEYS: routingKeysObj } of queues) {
+            const routingKeys = Object.keys(routingKeysObj);
 
-                        await channel.bindQueue(queueName, exchange, routingKey);
+            for (const routingKey of routingKeys) {
+                await channel.assertQueue(queueName, { durable: true });
 
-                        this.rabbitMQConsumer.startListening(queueName, routingKey);
-                    } else {
-                        logger.log(
-                            LoggerLevel.ERROR,
-                            loggerMessage({
-                                message: `Routing key is undefined or not a string for queue: ${queueName}`,
-                            }),
-                        );
-                    }
-                }
+                await channel.bindQueue(queueName, exchange, routingKey);
+
+                this.rabbitMQConsumer.startListening(queueName, routingKey);
             }
-            logger.log(LoggerLevel.INFO, loggerMessage({ message: `[*] Waiting for messages in ${queueName}` }));
+            logger.log(
+                LoggerLevel.INFO,
+                loggerMessage({
+                    message: `[*] Waiting for messages in ${queueName}`,
+                }),
+            );
         }
     }
 }

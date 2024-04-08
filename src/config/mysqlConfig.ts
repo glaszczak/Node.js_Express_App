@@ -1,14 +1,16 @@
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
 
+import { ENV } from './env';
+
 const mysqlConfig: MysqlConnectionOptions = {
     type: 'mysql',
-    host: process.env.MYSQL_CONNECTION_HOST,
-    port: Number(process.env.MYSQL_CONNECTION_PORT),
-    username: process.env.MYSQL_CONNECTION_USERNAME,
-    password: process.env.MYSQL_CONNECTION_PASSWORD,
-    database: process.env.MYSQL_CONNECTION_DATABASE,
+    host: ENV.MYSQL.HOST,
+    port: Number(ENV.MYSQL.PORT),
+    username: ENV.MYSQL.USERNAME,
+    password: ENV.MYSQL.PASSWORD,
+    database: ENV.MYSQL.DATABASE,
     synchronize: true,
-    // logging: process.env.NODE_ENV === 'development',
+    // logging: ENV.NODE.ENVIRONMENT === 'development',
     bigNumberStrings: false,
     connectTimeout: 10000,
     acquireTimeout: 10000,

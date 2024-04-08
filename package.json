@@ -20,7 +20,8 @@
     "morgan": "^1.10.0",
     "reflect-metadata": "^0.2.1",
     "typedi": "^0.10.0",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5",
@@ -41,9 +42,13 @@
     "typescript": "^5.4.3"
   },
   "nodemonConfig": {
-    "watch": ["src"],
+    "watch": [
+      "src"
+    ],
     "ext": "ts",
-    "ignore": ["src/**/*.spec.ts"],
+    "ignore": [
+      "src/**/*.spec.ts"
+    ],
     "exec": "dotenv -r ts-node/register/transpile-only -r tsconfig-paths/register ./src/index.ts"
   }
 }

@@ -1,3 +1,4 @@
+import { ENV } from 'config/env';
 import { Router } from 'express';
 import { RabbitMQProducer } from 'infrastructure/messaging/RabbitMQProducer';
 import { Container } from 'typedi';
@@ -5,7 +6,7 @@ import { Container } from 'typedi';
 const router = Router();
 
 router.post('/send-notification-to-exchange', async (req, res) => {
-    const exchange = process.env.RABBITMQ_EXCHANGE || '';
+    const exchange = ENV.RABBITMQ.EXCHANGE;
 
     const { routingKey, message } = req.body;
 

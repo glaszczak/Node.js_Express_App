@@ -1,3 +1,4 @@
+import { ENV } from 'config/env';
 import { LoggerLevel } from 'enums';
 import { readFileSync } from 'fs';
 import { TransformableInfo } from 'logform';
@@ -14,7 +15,7 @@ const packageJSON = JSON.parse(readFileSync(resolve('package.json')).toString())
 const customFormat = printf((data: TransformableInfo) => {
     if (data.source == 'express') {
         // That's express log format
-        return `[${data.timestamp}] [${process.env.APPLICATION_NAME}] [exp] [${data.level}] ${data.message}`;
+        return `[${data.timestamp}] [${ENV.APPLICATION.NAME}] [exp] [${data.level}] ${data.message}`;
     }
 
     if (data.error !== null && data.error instanceof Error) {
@@ -24,8 +25,8 @@ const customFormat = printf((data: TransformableInfo) => {
         };
     }
 
-    return `[${data.timestamp}] [${process.env.APPLICATION_NAME}] [${data.level}] [${data.requestId || ''}] [${
-        process.env.NODE_ENV === 'development' ? JSON.stringify(data, null, 4) : JSON.stringify(data)
+    return `[${data.timestamp}] [${ENV.APPLICATION.NAME}] [${data.level}] [${data.requestId || ''}] [${
+        ENV.NODE.ENVIRONMENT === 'development' ? JSON.stringify(data, null, 4) : JSON.stringify(data)
     }]`;
 });
 
@@ -36,7 +37,7 @@ const ignorePrivate = format((data) => {
     return data;
 });
 
-if (process.env.WINSTON_CONSOLE_ENABLED) {
+if (ENV.WINSTON.CONSOLE_ENABLED) {
     enabledTransports.push(
         new transports.Console({
             level: LoggerLevel.INFO,
@@ -45,22 +46,22 @@ if (process.env.WINSTON_CONSOLE_ENABLED) {
     );
 }
 
-if (process.env.WINSTON_FILE_PATH) {
+if (ENV.WINSTON.TRANSPORT_FILE_PATH) {
     enabledTransports.push(
         new transports.File({
             handleExceptions: true,
-            filename: process.env.WINSTON_TRANSPORT_FILE_PATH,
+            filename: ENV.WINSTON.TRANSPORT_FILE_PATH,
         }),
     );
 }
 
-if (process.env.WINSTON_TRANSPORT_SENTRY_DSN) {
+if (ENV.WINSTON.TRANSPORT_SENTRY_DSN) {
     enabledTransports.push(
         new SentryTransport({
             sentry: {
                 normalizeDepth: 10,
-                dsn: process.env.WINSTON_TRANSPORT_SENTRY_DSN,
-                environment: process.env.APPLICATION_MODE,
+                dsn: ENV.WINSTON.TRANSPORT_SENTRY_DSN,
+                environment: ENV.NODE.ENVIRONMENT,
                 release: `${packageJSON.name}@${packageJSON.version}`,
             },
             level: LoggerLevel.ERROR,
