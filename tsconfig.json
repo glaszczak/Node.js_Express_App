@@ -13,7 +13,9 @@
     "emitDecoratorMetadata": true,  
     "experimentalDecorators": true,  
     "strictPropertyInitialization": false,    
+    "resolveJsonModule": true,
     "paths": {
+      "@root/*": ["../*"],
       "enums/*":["src/enums"]
     }
   }

@@ -1,3 +1,3 @@
 export interface IHealthCheck {
-    check(): Promise<{ serviceName: string; isHealthy: boolean; details?: string }>;
+    check(): Promise<{ isHealthy: boolean; details?: string }>;
 }

@@ -7,12 +7,12 @@ import { IHealthCheck } from './IHealthCheck';
 export class MySQLHealthCheck implements IHealthCheck {
     constructor(private dataSource: DataSource) {}
 
-    async check(): Promise<{ serviceName: string; isHealthy: boolean; details?: string }> {
+    async check(): Promise<{ isHealthy: boolean; details?: string }> {
         try {
             await this.dataSource.query('SELECT 1');
-            return { serviceName: 'MySQL', isHealthy: true };
+            return { isHealthy: true };
         } catch (error: any) {
-            return { serviceName: 'MySQL', isHealthy: false, details: error.message };
+            return { isHealthy: false, details: error.message };
         }
     }
 }
