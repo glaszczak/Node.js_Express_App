@@ -20,11 +20,6 @@ export const enum LogCode {
     CODE_G008 = 'CODE_G008',
 
     CODE_E001 = 'CODE_E001',
-    CODE_E002 = 'CODE_E002',
-    CODE_E003 = 'CODE_E003',
-    CODE_E004 = 'CODE_E004',
-    CODE_E005 = 'CODE_E005',
-    CODE_E006 = 'CODE_E006',
 }
 
 export const enum LogCodeDictionary {
@@ -38,14 +33,5 @@ export const enum LogCodeDictionary {
     CODE_G007 = 'Unprocessable Entity',
     CODE_G008 = 'Too Many Requests',
 
-    CODE_E001 = 'No handler registered',
-    CODE_E002 = 'Handler does not have a handle method',
-    CODE_E003 = 'Failed to execute handler for token',
-    CODE_E004 = 'Error fetching users',
-    CODE_E005 = 'Error fetching user by ID',
-    CODE_E006 = 'Error creating user',
-}
-
-export const enum MySQLCode {
-    ER_DUP_ENTRY = 'ER_DUP_ENTRY',
+    CODE_E001 = 'Custom Log',
 }

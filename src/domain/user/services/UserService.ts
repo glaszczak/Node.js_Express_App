@@ -1,40 +1,23 @@
-import { CreateUserCommand } from 'application/commands/user/CreateUserCommand';
-import { GetAllUsersQuery } from 'application/queries/user/GetAllUsersQuery';
-import { GetUserByIdQuery } from 'application/queries/user/GetUserByIdQuery';
-import { CreateUserCommandToken, GetAllUsersQueryToken, GetUserByIdQueryToken } from 'config/tokenDescriptions';
 import { LogCode, LoggerLevel } from 'enums';
-import { CommandBus } from 'infrastructure/cqrs/CommandBus';
-import { QueryBus } from 'infrastructure/cqrs/QueryBus';
-import { Service } from 'typedi';
+import { UserRepository } from 'infrastructure/repositories/UserRepository';
+import { Inject, Service } from 'typedi';
 import { ApiError, logger, loggerMessage } from 'utils/logger';
 
 import { User } from '../User';
 
 @Service()
 export class UserService {
-    constructor(
-        private queryBus: QueryBus,
-        private commandBus: CommandBus,
-    ) {}
+    constructor(@Inject(() => UserRepository) private userRepository: UserRepository) {}
 
     async getAllUsers(): Promise<User[]> {
         try {
-            const users = await this.queryBus.execute(GetAllUsersQueryToken, new GetAllUsersQuery());
-
-            logger.log(
-                LoggerLevel.INFO,
-                loggerMessage({
-                    message: 'All users fetched successfully',
-                }),
-            );
-
-            return users;
+            return this.userRepository.getAllUsers();
         } catch (error) {
             logger.log(
                 LoggerLevel.ERROR,
                 loggerMessage({
-                    message: 'UserService.getAllUsers failed',
-                    error: error,
+                    message: 'UserService.getAllUsers',
+                    error,
                 }),
             );
 
@@ -49,14 +32,18 @@ export class UserService {
 
     async getUserById(userId: number): Promise<User | null> {
         try {
-            const user = await this.queryBus.execute(GetUserByIdQueryToken, new GetUserByIdQuery(userId));
-            logger.log(
-                LoggerLevel.INFO,
-                loggerMessage({
-                    message: 'User fetched successfully by ID',
-                }),
-            );
-            return user;
+            const user = await this.userRepository.getUserById(userId);
+
+            if (user.length === 0) {
+                logger.log(
+                    LoggerLevel.WARN,
+                    loggerMessage({
+                        message: `User with ID ${userId} not found.`,
+                    }),
+                );
+            }
+
+            return user[0];
         } catch (error) {
             logger.log(
                 LoggerLevel.ERROR,
@@ -68,34 +55,29 @@ export class UserService {
 
             throw new ApiError({
                 statusCode: 400,
-                response: { code: LogCode.CODE_G001, message: 'Error fetching user by ID' },
+                response: {
+                    code: LogCode.CODE_G001,
+                },
             });
         }
     }
 
     async createUser(userData: User): Promise<void> {
         try {
-            await this.commandBus.execute(CreateUserCommandToken, new CreateUserCommand(userData));
-
-            logger.log(
-                LoggerLevel.INFO,
-                loggerMessage({
-                    message: 'User created successfully',
-                }),
-            );
+            await this.userRepository.createUser(userData);
         } catch (error) {
             logger.log(
                 LoggerLevel.ERROR,
                 loggerMessage({
                     message: 'UserService.createUser failed',
-                    error: error,
+                    error,
                 }),
             );
+
             throw new ApiError({
                 statusCode: 500,
                 response: {
                     code: LogCode.CODE_G001,
-                    message: 'Failed to create user due to an unexpected error',
                 },
             });
         }

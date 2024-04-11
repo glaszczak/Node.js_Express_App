@@ -1,23 +1,22 @@
+import packageJson from '@root/package.json';
 import { LogCode } from 'enums';
 import { Request, Response, Router } from 'express';
 import { MySQLHealthCheck } from 'infrastructure/healthCheck/MySQLHealthCheck';
-import { RabbitMQHealthCheck } from 'infrastructure/healthCheck/RabbitMQHealthCheck';
+import { RabbitMqHealthCheck } from 'infrastructure/healthCheck/RabbitMqHealthCheck';
 import Container from 'typedi';
 
-import rabbitMQRoutes from './rabbitMQRoutes';
+import rabbitMqRoutes from './rabbitMQRoutes';
 import userRoutes from './userRoutes';
 
 const router = Router();
 
-import packageJson from '@root/package.json';
-
+router.use('/rabbitmq', rabbitMqRoutes);
 router.use('/user', userRoutes);
-router.use('/rabbitmq', rabbitMQRoutes);
 
 router.get('/check/ping', async (req: Request, res: Response) => {
     try {
         const mysqlHealth = await Container.get(MySQLHealthCheck).check();
-        const rabbitHealth = await Container.get(RabbitMQHealthCheck).check();
+        const rabbitHealth = await Container.get(RabbitMqHealthCheck).check();
 
         res.status(200).json({
             mysql: mysqlHealth,

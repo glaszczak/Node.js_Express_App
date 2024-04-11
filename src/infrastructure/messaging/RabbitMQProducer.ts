@@ -1,33 +1,35 @@
 import { Channel } from 'amqplib';
-import { Service } from 'typedi';
+import { Inject, Service } from 'typedi';
 
-import { RabbitMQService } from './RabbitMQService';
+import { Message } from './handlers/messageHandlers';
+import { RabbitMqService } from './RabbitMqService';
 
 @Service()
-export class RabbitMQProducer {
+export class RabbitMqProducer {
     private channel: Channel;
 
-    constructor(private rabbitMQService: RabbitMQService) {}
+    @Inject(() => RabbitMqService)
+    private rabbitMqService: RabbitMqService;
 
     public async initialize() {
-        if (!this.rabbitMQService.isConnected()) {
-            throw new Error('RabbitMQService is not connected.');
+        if (!this.rabbitMqService.isConnected()) {
+            throw new Error('RabbitMqService is not connected.');
         }
-        this.channel = await this.rabbitMQService.getChannel();
+        this.channel = await this.rabbitMqService.getChannel();
     }
 
-    public async sendToQueue(queueName: string, message: string): Promise<boolean> {
-        if (!this.channel) throw new Error('RabbitMQ channel not initialized');
-
-        return this.channel.sendToQueue(queueName, Buffer.from(message), {
-            persistent: true,
-        });
-    }
-
-    async publishToExchange(exchange: string, routingKey: string, message: string) {
+    async publishToExchange(exchange: string, routingKey: string, message: Message) {
         if (!this.channel) throw new Error('RabbitMQ channel not initialized');
 
         await this.channel.assertExchange(exchange, 'topic', { durable: true });
-        this.channel.publish(exchange, routingKey, Buffer.from(message));
+        this.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)));
+    }
+
+    public async sendToQueue(queueName: string, message: Message): Promise<boolean> {
+        if (!this.channel) throw new Error('RabbitMQ channel not initialized');
+
+        return this.channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message)), {
+            persistent: true,
+        });
     }
 }

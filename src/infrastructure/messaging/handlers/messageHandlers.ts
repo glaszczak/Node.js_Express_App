@@ -4,7 +4,12 @@ import { handleMessagesForQueue1Topic1A } from './handleMessagesForQueue1Topic1A
 import { handleMessagesForQueue2Topic2A } from './handleMessagesForQueue2Topic2A';
 import { handleMessagesForQueue2Topic2B } from './handleMessagesForQueue2Topic2B';
 
-type MessageHandler = (msgContent: string) => void;
+export interface Message {
+    subject: string;
+    description: string;
+}
+
+type MessageHandler = (msgContent: Message) => void;
 
 interface MessageHandlers {
     [key: string]: MessageHandler;

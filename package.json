@@ -41,7 +41,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3"
   },
-  "nodemonConfig": {
+  "nodemonConfig": { 
     "watch": [
       "src"
     ],

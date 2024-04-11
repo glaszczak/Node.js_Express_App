@@ -3,20 +3,20 @@ import { LoggerLevel } from 'enums';
 import { Inject, Service } from 'typedi';
 import { logger, loggerMessage } from 'utils/logger';
 
-import { RabbitMQConsumer } from './RabbitMQConsumer';
-import { RabbitMQProducer } from './RabbitMQProducer';
-import { RabbitMQService } from './RabbitMQService';
+import { RabbitMqConsumer } from './RabbitMqConsumer';
+import { RabbitMqProducer } from './RabbitMqProducer';
+import { RabbitMqService } from './RabbitMqService';
 
 @Service()
-export class RabbitMQInitializer {
-    @Inject(() => RabbitMQService)
-    private rabbitMQService: RabbitMQService;
+export class RabbitMqInitializer {
+    @Inject(() => RabbitMqService)
+    private rabbitMqService: RabbitMqService;
 
-    @Inject(() => RabbitMQConsumer)
-    private rabbitMQConsumer: RabbitMQConsumer;
+    @Inject(() => RabbitMqConsumer)
+    private rabbitMqConsumer: RabbitMqConsumer;
 
-    @Inject(() => RabbitMQProducer)
-    private rabbitMQProducer: RabbitMQProducer;
+    @Inject(() => RabbitMqProducer)
+    private rabbitMqProducer: RabbitMqProducer;
 
     @Inject('RABBITMQ_URI')
     private rabbitMqUri: string;
@@ -26,37 +26,37 @@ export class RabbitMQInitializer {
             logger.log(
                 LoggerLevel.ERROR,
                 loggerMessage({
-                    message: 'RabbitMQ URI not defined in environment variables.',
+                    message: 'RabbitMq URI not defined in environment variables.',
                 }),
             );
 
-            throw new Error('RabbitMQ URI not defined in environment variables.');
+            throw new Error('RabbitMq URI not defined in environment variables.');
         }
 
         try {
-            await this.rabbitMQService.connect(this.rabbitMqUri);
+            await this.rabbitMqService.connect(this.rabbitMqUri);
 
-            if (this.rabbitMQService.isConnected()) {
-                await this.rabbitMQConsumer.initialize();
+            if (this.rabbitMqService.isConnected()) {
+                await this.rabbitMqConsumer.initialize();
 
                 await this.setupTopicExchangeAndQueues();
 
-                await this.rabbitMQProducer.initialize();
+                await this.rabbitMqProducer.initialize();
 
                 logger.log(
                     LoggerLevel.INFO,
                     loggerMessage({
-                        message: 'RabbitMQ communication initialized with topic exchange.',
+                        message: 'RabbitMq communication initialized with topic exchange.',
                     }),
                 );
             } else {
-                throw new Error('Unable to initialize RabbitMQ communication due to connection issues');
+                throw new Error('Unable to initialize RabbitMq communication due to connection issues');
             }
         } catch (error) {
             logger.log(
                 LoggerLevel.ERROR,
                 loggerMessage({
-                    message: `Failed to initialize RabbitMQ communication: ${error}`,
+                    message: `Failed to initialize RabbitMq communication: ${error}`,
                 }),
             );
         }
@@ -66,7 +66,7 @@ export class RabbitMQInitializer {
         const exchange = ENV.RABBITMQ.EXCHANGE;
         const queues = ENV.RABBITMQ.QUEUES;
 
-        const channel = await this.rabbitMQService.getChannel();
+        const channel = await this.rabbitMqService.getChannel();
 
         await channel.assertExchange(exchange, 'topic', { durable: true });
 
@@ -78,7 +78,7 @@ export class RabbitMQInitializer {
 
                 await channel.bindQueue(queueName, exchange, routingKey);
 
-                this.rabbitMQConsumer.startListening(queueName, routingKey);
+                this.rabbitMqConsumer.startListening(queueName, routingKey);
             }
             logger.log(
                 LoggerLevel.INFO,

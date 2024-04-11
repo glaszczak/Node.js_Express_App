@@ -4,9 +4,7 @@ import { ENV } from 'config/env';
 import { LoggerLevel } from 'enums';
 import express from 'express';
 import helmet from 'helmet';
-import { registerCommandHandlers } from 'infrastructure/cqrs/registerCommandHandlers';
-import { registerQueryHandlers } from 'infrastructure/cqrs/registerQueryHandlers';
-import { RabbitMQInitializer } from 'infrastructure/messaging/RabbitMQInitializer';
+import { RabbitMqInitializer } from 'infrastructure/messaging/RabbitMqInitializer';
 import routes from 'infrastructure/routes/router';
 import Container from 'typedi';
 import { logger, loggerMessage } from 'utils/logger';
@@ -19,14 +17,13 @@ app.use(helmet());
 
 async function initializeDependencies() {
     Container.set('RABBITMQ_URI', ENV.RABBITMQ.URI);
-
     Container.set('RABBITMQ_QUEUE_1', ENV.RABBITMQ.QUEUES[0]?.NAME);
     Container.set('RABBITMQ_QUEUE_2', ENV.RABBITMQ.QUEUES[1]?.NAME);
 
     try {
-        const rabbitMQInitializer = Container.get(RabbitMQInitializer);
+        const rabbitMqInitializer = Container.get(RabbitMqInitializer);
 
-        await rabbitMQInitializer.initialize();
+        await rabbitMqInitializer.initialize();
 
         logger.log(
             LoggerLevel.INFO,
@@ -44,9 +41,6 @@ async function initializeDependencies() {
         throw error;
     }
 }
-
-registerQueryHandlers();
-registerCommandHandlers();
 
 app.use('/api', routes);
 

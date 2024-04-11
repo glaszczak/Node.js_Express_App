@@ -1,14 +1,26 @@
 import { Channel, connect, Connection } from 'amqplib';
-import { LoggerLevel } from 'enums';
-import { Service } from 'typedi';
-import { logger, loggerMessage } from 'utils/logger';
+import { LogCode, LoggerLevel } from 'enums';
+import { Inject, Service } from 'typedi';
+import { ApiError, logger, loggerMessage } from 'utils/logger';
+
+import { Message } from './handlers/messageHandlers';
+import { RabbitMqConsumer } from './RabbitMqConsumer';
+import { RabbitMqProducer } from './RabbitMqProducer';
 
 @Service()
-export class RabbitMQService {
+export class RabbitMqService {
     private connection: Connection | null = null;
     private channel: Channel | null = null;
 
+    @Inject(() => RabbitMqProducer)
+    private rabbitMqProducer: RabbitMqProducer;
+
+    @Inject(() => RabbitMqConsumer)
+    private rabbitMqConsumer: RabbitMqConsumer;
+
     async connect(uri: string): Promise<void> {
+        if (this.connection) return;
+
         try {
             this.connection = await connect(uri);
             this.channel = await this.connection.createChannel();
@@ -23,10 +35,17 @@ export class RabbitMQService {
             logger.log(
                 LoggerLevel.ERROR,
                 loggerMessage({
-                    message: `Failed to connect to RabbitMQ: ${error}`,
+                    message: 'Failed to connect to RabbitMQ',
+                    error,
                 }),
             );
-            throw new Error(`Failed to connect to RabbitMQ: ${error}`);
+
+            throw new ApiError({
+                statusCode: 500,
+                response: {
+                    code: LogCode.CODE_G005,
+                },
+            });
         }
     }
 
@@ -68,5 +87,13 @@ export class RabbitMQService {
                 }),
             );
         }
+    }
+
+    public async publishToExchange(exchange: string, routingKey: string, message: Message): Promise<void> {
+        await this.rabbitMqProducer.publishToExchange(exchange, routingKey, message);
+    }
+
+    public async sendToQueue(queue: string, message: Message): Promise<void> {
+        await this.rabbitMqProducer.sendToQueue(queue, message);
     }
 }

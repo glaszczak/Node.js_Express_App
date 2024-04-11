@@ -1,42 +1,44 @@
 import { Channel } from 'amqplib';
 import { LoggerLevel } from 'enums';
-import { Service } from 'typedi';
+import { Inject, Service } from 'typedi';
 import { logger, loggerMessage } from 'utils/logger';
 
 import { messageHandlers } from './handlers';
-import { RabbitMQService } from './RabbitMQService';
+import { RabbitMqService } from './RabbitMqService';
 
 @Service()
-export class RabbitMQConsumer {
+export class RabbitMqConsumer {
     private channel: Channel;
 
-    constructor(private rabbitMQService: RabbitMQService) {}
+    @Inject(() => RabbitMqService)
+    private rabbitMqService: RabbitMqService;
 
     public async initialize(): Promise<void> {
-        if (!this.rabbitMQService.isConnected()) throw new Error('RabbitMQService is not connected.');
+        if (!this.rabbitMqService.isConnected()) throw new Error('RabbitMqService is not connected.');
 
-        this.channel = await this.rabbitMQService.getChannel();
+        this.channel = await this.rabbitMqService.getChannel();
     }
 
     async startListening(queueName: string, routingKey: string) {
-        if (!this.channel) throw new Error('RabbitMQ channel not initialized');
+        if (!this.channel) throw new Error('RabbitMq channel not initialized');
 
         this.channel.consume(
             queueName,
             (msg) => {
                 if (msg) {
-                    const msgContent = msg.content.toString();
+                    const msgContent = JSON.parse(msg.content.toString());
+
                     const handler = messageHandlers[routingKey];
 
                     if (typeof handler === 'function') {
-                        handler(msgContent);
-
+                        // TODO: implement method to handle received message
                         logger.log(
                             LoggerLevel.INFO,
                             loggerMessage({
-                                message: `[x] Received message on '${routingKey}': '${msgContent}' from queue '${queueName}'`,
+                                message: `[x] Received message on '${routingKey}': '${JSON.stringify(msgContent)}' from queue '${queueName}'`,
                             }),
                         );
+                        handler(msgContent);
                     } else {
                         logger.log(
                             LoggerLevel.WARN,
