@@ -76,4 +76,24 @@ export class UserController {
             }
         }
     }
+
+    async testLibrary(req: Request, res: Response): Promise<void> {
+        try {
+            await this.userService.testLibrary();
+
+            res.status(200).json();
+        } catch (error: any) {
+            res.status(error.statusCode || 500).json(error.response);
+
+            if (!error.response) {
+                logger.log(
+                    LoggerLevel.ERROR,
+                    loggerMessage({
+                        name: 'UserController.testLibrary',
+                        error,
+                    }),
+                );
+            }
+        }
+    }
 }

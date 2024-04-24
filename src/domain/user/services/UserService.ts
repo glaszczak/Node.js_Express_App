@@ -1,3 +1,4 @@
+import { LibraryService } from 'app-name/dist/src/services/LibraryService';
 import { LogCode, LoggerLevel } from 'enums';
 import { UserRepository } from 'infrastructure/repositories/UserRepository';
 import { Inject, Service } from 'typedi';
@@ -7,7 +8,12 @@ import { User } from '../User';
 
 @Service()
 export class UserService {
-    constructor(@Inject(() => UserRepository) private userRepository: UserRepository) {}
+    constructor(
+        @Inject(() => UserRepository)
+        private userRepository: UserRepository,
+        @Inject(() => LibraryService)
+        private libraryService: LibraryService,
+    ) {}
 
     async getAllUsers(): Promise<User[]> {
         try {
@@ -70,6 +76,27 @@ export class UserService {
                 LoggerLevel.ERROR,
                 loggerMessage({
                     message: 'UserService.createUser failed',
+                    error,
+                }),
+            );
+
+            throw new ApiError({
+                statusCode: 500,
+                response: {
+                    code: LogCode.CODE_G001,
+                },
+            });
+        }
+    }
+
+    async testLibrary(): Promise<void> {
+        try {
+            await this.libraryService.logFromLibrary('witaj!');
+        } catch (error) {
+            logger.log(
+                LoggerLevel.ERROR,
+                loggerMessage({
+                    message: 'UserService.testLibrary failed',
                     error,
                 }),
             );
