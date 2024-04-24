@@ -35,6 +35,12 @@ export class ApiError extends Error {
                     code: LogCode.CODE_G002,
                 };
                 break;
+            case 403:
+                this.response = data.response || {
+                    message: 'Forbidden',
+                    code: LogCode.CODE_G006,
+                };
+                break;
             case 404:
                 this.response = data.response || {
                     message: 'Not Found',
