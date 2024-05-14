@@ -10,7 +10,7 @@ const mysqlConfig: MysqlConnectionOptions = {
     password: ENV.MYSQL.PASSWORD,
     database: ENV.MYSQL.DATABASE,
     synchronize: true,
-    // logging: ENV.NODE.ENVIRONMENT === 'development',
+    // logging: ENV.APPLICATION.MODE === 'development',
     bigNumberStrings: false,
     connectTimeout: 10000,
     acquireTimeout: 10000,

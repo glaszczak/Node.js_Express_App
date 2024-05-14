@@ -1,61 +1,89 @@
 import { z } from 'zod';
 
-const toBoolean = (val: unknown): boolean => {
+const toBoolean = (val: unknown): boolean | undefined => {
     if (typeof val === 'string') {
-        return val === 'true';
+        const normalized = val.trim().toLowerCase();
+
+        if (normalized === 'true') {
+            return true;
+        } else if (normalized === 'false') {
+            return false;
+        }
+        return undefined;
     }
-    return false;
+    return undefined;
 };
 
+const boolSchema = z.preprocess(toBoolean, z.union([z.boolean(), z.undefined()])).refine((val) => val !== undefined, {
+    message: "Value must be explicitly set to 'true' or 'false'.",
+});
+
+const parseNumber = (input: any): number | undefined => {
+    const number = parseFloat(input);
+
+    if (isNaN(number)) return undefined;
+
+    return number;
+};
+
+const numberSchema = z
+    .preprocess(parseNumber, z.number().optional())
+    .refine((val) => val !== undefined, { message: 'Must be a valid number and cannot be empty.' });
+
 const envSchema = z.object({
-    NODE: z.object({
-        ENVIRONMENT: z.string().default('development'),
-    }),
     APPLICATION: z.object({
-        HOST: z.string().default('0.0.0.0'),
-        PORT: z.number().default(3000),
-        NAME: z.string(),
+        MODE: z.string().min(1),
+        HOST: z.string().min(1),
+        PORT: numberSchema,
+        NAME: z.string().min(1),
+    }),
+    FRONTEND: z.object({
+        HOST: z.string().min(1),
     }),
     JWT: z.object({
-        ACCESS_TOKEN_SECRET: z.string(),
+        ACCESS_TOKEN_SECRET: z.string().min(1),
     }),
     MYSQL: z.object({
-        HOST: z.string().default('0.0.0.0'),
-        PORT: z.number().default(3307),
-        DATABASE: z.string(),
-        USERNAME: z.string(),
-        PASSWORD: z.string(),
+        HOST: z.string(),
+        PORT: numberSchema,
+        DATABASE: z.string().min(1),
+        USERNAME: z.string().min(1),
+        PASSWORD: z.string().min(1),
     }),
     RABBITMQ: z.object({
-        HOST: z.string(),
-        PORT: z.number().default(5672),
-        USERNAME: z.string(),
-        PASSWORD: z.string(),
-        VHOST: z.string(),
-        URI: z.string(),
-        EXCHANGE: z.string(),
+        HOST: z.string().min(1),
+        PORT: numberSchema,
+        USERNAME: z.string().min(1),
+        PASSWORD: z.string().min(1),
+        VHOST: z.string().min(1),
+        URI: z.string().min(1),
+        EXCHANGE: z.string().min(1),
         QUEUES: z.array(
             z.object({
-                NAME: z.string(),
+                NAME: z.string().min(1),
                 ROUTING_KEYS: z.record(z.string()),
             }),
         ),
     }),
     WINSTON: z.object({
-        CONSOLE_ENABLED: z.preprocess(toBoolean, z.boolean()),
-        TRANSPORT_FILE_PATH: z.string(),
-        TRANSPORT_SENTRY_DSN: z.string(),
+        CONSOLE_ENABLED: boolSchema,
+        // or simplier but without checking if variable exists
+        // CONSOLE_ENABLED: z.string().transform((val) => val === 'true'),
+        TRANSPORT_FILE_PATH: z.string().min(1),
+        TRANSPORT_SENTRY_DSN: z.string().min(1),
     }),
 });
 
 export const ENV = envSchema.parse({
-    NODE: {
-        ENVIRONMENT: process.env.NODE_ENV,
-    },
     APPLICATION: {
+        IS_TRUE: process.env.IS_TRUE,
+        MODE: process.env.APPLICATION_MODE,
         HOST: process.env.APPLICATION_HOST,
         PORT: process.env.APPLICATION_PORT ? parseInt(process.env.APPLICATION_PORT, 10) : undefined,
         NAME: process.env.APPLICATION_NAME,
+    },
+    FRONTEND: {
+        HOST: process.env.FRONTEND_HOST,
     },
     JWT: {
         ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,

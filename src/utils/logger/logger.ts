@@ -26,7 +26,7 @@ const customFormat = printf((data: TransformableInfo) => {
     }
 
     return `[${data.timestamp}] [${ENV.APPLICATION.NAME}] [${data.level}] [${data.requestId || ''}] [${
-        ENV.NODE.ENVIRONMENT === 'development' ? JSON.stringify(data, null, 4) : JSON.stringify(data)
+        ENV.APPLICATION.MODE === 'development' ? JSON.stringify(data, null, 4) : JSON.stringify(data)
     }]`;
 });
 
@@ -61,7 +61,7 @@ if (ENV.WINSTON.TRANSPORT_SENTRY_DSN) {
             sentry: {
                 normalizeDepth: 10,
                 dsn: ENV.WINSTON.TRANSPORT_SENTRY_DSN,
-                environment: ENV.NODE.ENVIRONMENT,
+                environment: ENV.APPLICATION.MODE,
                 release: `${packageJSON.name}@${packageJSON.version}`,
             },
             level: LoggerLevel.ERROR,
