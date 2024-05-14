@@ -1,13 +1,19 @@
 import 'infrastructure/storages/database';
 
 import { ENV } from 'config/env';
-import { LoggerLevel } from 'enums';
-import express from 'express';
+import { LogCode, LoggerLevel } from 'enums';
+import express, { Request, Response } from 'express';
 import helmet from 'helmet';
+import { MySQLHealthCheck } from 'infrastructure/healthCheck/MySQLHealthCheck';
+import { RabbitMqHealthCheck } from 'infrastructure/healthCheck/RabbitMqHealthCheck';
 import { RabbitMqInitializer } from 'infrastructure/messaging/RabbitMqInitializer';
 import routes from 'infrastructure/routes/router';
+import { resolve } from 'path';
 import Container from 'typedi';
 import { logger, loggerMessage } from 'utils/logger';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const packageJson = require(resolve('package.json'));
 
 const app = express();
 
@@ -42,6 +48,23 @@ async function initializeDependencies() {
     }
 }
 
+app.get('/check/ping', async (_: Request, res: Response) => {
+    try {
+        const mysqlHealth = await Container.get(MySQLHealthCheck).check();
+        const rabbitHealth = await Container.get(RabbitMqHealthCheck).check();
+
+        res.json({
+            v: packageJson.version,
+            mysql: mysqlHealth,
+            rabbitMQ: rabbitHealth,
+        });
+    } catch (error: any) {
+        res.status(error.statusCode || 500).json(error.response);
+    }
+});
+
 app.use('/api', routes);
+
+app.get('*', (_, res) => res.status(404).json({ code: LogCode.CODE_G003 }));
 
 export { app, initializeDependencies };
