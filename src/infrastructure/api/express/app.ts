@@ -59,7 +59,7 @@ app.get('/check/ping', async (_: Request, res: Response) => {
             rabbitMQ: rabbitHealth,
         });
     } catch (error: any) {
-        res.status(error.statusCode || 500).json(error.response);
+        res.status(error.statusCode || 500).json(error.response || {});
     }
 });
 

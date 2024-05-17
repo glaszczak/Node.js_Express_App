@@ -41,9 +41,9 @@ export class RabbitMqService {
             );
 
             throw new ApiError({
-                statusCode: 500,
+                statusCode: 422,
                 response: {
-                    code: LogCode.CODE_G005,
+                    code: LogCode.CODE_G007,
                 },
             });
         }

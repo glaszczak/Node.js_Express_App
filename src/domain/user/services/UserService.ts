@@ -22,15 +22,15 @@ export class UserService {
             logger.log(
                 LoggerLevel.ERROR,
                 loggerMessage({
-                    message: 'UserService.getAllUsers',
+                    message: 'Failed to get users',
                     error,
                 }),
             );
 
             throw new ApiError({
-                statusCode: 400,
+                statusCode: 422,
                 response: {
-                    code: LogCode.CODE_G001,
+                    code: LogCode.CODE_G007,
                 },
             });
         }
@@ -54,15 +54,15 @@ export class UserService {
             logger.log(
                 LoggerLevel.ERROR,
                 loggerMessage({
-                    message: 'UserService.getUserById failed',
+                    message: 'Failed to get user',
                     error: error,
                 }),
             );
 
             throw new ApiError({
-                statusCode: 400,
+                statusCode: 422,
                 response: {
-                    code: LogCode.CODE_G001,
+                    code: LogCode.CODE_G007,
                 },
             });
         }
@@ -75,15 +75,15 @@ export class UserService {
             logger.log(
                 LoggerLevel.ERROR,
                 loggerMessage({
-                    message: 'UserService.createUser failed',
+                    message: 'Failed to create user',
                     error,
                 }),
             );
 
             throw new ApiError({
-                statusCode: 500,
+                statusCode: 422,
                 response: {
-                    code: LogCode.CODE_G001,
+                    code: LogCode.CODE_G007,
                 },
             });
         }
@@ -102,9 +102,9 @@ export class UserService {
             );
 
             throw new ApiError({
-                statusCode: 500,
+                statusCode: 422,
                 response: {
-                    code: LogCode.CODE_G001,
+                    code: LogCode.CODE_G007,
                 },
             });
         }

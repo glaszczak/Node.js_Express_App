@@ -17,10 +17,8 @@ export class RabbitMqController {
 
             await this.rabbitMqService.publishToExchange(exchange, routingKey, message);
 
-            res.status(200).json({ message: 'Notification has been sent to the exchange.' });
+            res.json({ message: 'Notification has been sent to the exchange.' });
         } catch (error: any) {
-            res.status(error.statusCode || 500).json(error.response);
-
             if (!error.response) {
                 logger.log(
                     LoggerLevel.ERROR,
@@ -30,6 +28,8 @@ export class RabbitMqController {
                     }),
                 );
             }
+
+            res.status(error.statusCode || 500).json(error.response || {});
         }
     }
 
@@ -39,10 +39,8 @@ export class RabbitMqController {
 
             await this.rabbitMqService.sendToQueue(queueName, message);
 
-            res.status(200).json({ message: 'Notification has been sent to the queue.' });
+            res.json({ message: 'Notification has been sent to the queue.' });
         } catch (error: any) {
-            res.status(error.statusCode || 500).json(error.response);
-
             if (!error.response) {
                 logger.log(
                     LoggerLevel.ERROR,
@@ -52,6 +50,8 @@ export class RabbitMqController {
                     }),
                 );
             }
+
+            res.status(error.statusCode || 500).json(error.response || {});
         }
     }
 }

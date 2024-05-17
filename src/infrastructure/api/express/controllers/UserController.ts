@@ -14,7 +14,7 @@ export class UserController {
 
             res.json(users);
         } catch (error: any) {
-            res.status(error.statusCode || 500).json(error.response);
+            res.status(error.statusCode || 500).json(error.response || {});
 
             if (!error.response) {
                 logger.log(
@@ -41,7 +41,7 @@ export class UserController {
 
             res.json(user);
         } catch (error: any) {
-            res.status(error.statusCode || 500).json(error.response);
+            res.status(error.statusCode || 500).json(error.response || {});
 
             if (!error.response) {
                 logger.log(
@@ -63,7 +63,7 @@ export class UserController {
 
             res.status(201).json();
         } catch (error: any) {
-            res.status(error.statusCode || 500).json(error.response);
+            res.status(error.statusCode || 500).json(error.response || {});
 
             if (!error.response) {
                 logger.log(
@@ -83,8 +83,6 @@ export class UserController {
 
             res.status(200).json();
         } catch (error: any) {
-            res.status(error.statusCode || 500).json(error.response);
-
             if (!error.response) {
                 logger.log(
                     LoggerLevel.ERROR,
@@ -94,6 +92,8 @@ export class UserController {
                     }),
                 );
             }
+
+            res.status(error.statusCode || 500).json(error.response || {});
         }
     }
 }
