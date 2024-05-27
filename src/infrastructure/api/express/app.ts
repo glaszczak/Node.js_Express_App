@@ -1,5 +1,6 @@
 import 'infrastructure/storages/database';
 
+import { setupAxiosInterceptors } from 'config/axios';
 import { ENV } from 'config/env';
 import { LogCode, LoggerLevel } from 'enums';
 import express, { Request, Response } from 'express';
@@ -14,6 +15,8 @@ import { logger, loggerMessage } from 'utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const packageJson = require(resolve('package.json'));
+
+setupAxiosInterceptors();
 
 const app = express();
 
